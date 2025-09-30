@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Pricing Coach & Infopreneur Pro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro', 'Segoe UI', sans-serif;
+            background: #F7F7F7;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+        
+        .container { max-width: 880px; margin: 0 auto; padding: 40px 20px; }
+        
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 32px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+        .header p { font-size: 16px; color: #666; }
+        
+        .mode-switcher { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn:hover { background: #f0f0ff; }
+        .mode-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        
+        .mode-panel { display: none; }
+        .mode-panel.active { display: block; }
+        
+        .intro-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 32px;
+        }
+        .intro-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #1a1a1a; }
+        .intro-card p { color: #666; font-size: 14px; }
+        
+        .goal-input-card {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 32px;
+        }
+        
+        .goal-input-group {
+            margin-bottom: 24px;
+        }
+        
+        .goal-input-group label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .goal-input-large {
+            width: 100%;
+            padding: 16px 20px;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            color: #667eea;
+        }
+        
+        .goal-input-large:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+        
+        .calculate-goal-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .calculate-goal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        
+        .goal-results {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin: 32px 0;
+            display: none;
+        }
+        
+        .goal-results.show {
+            display: block;
+        }
+        
+        .goal-results h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+        
+        .goal-metric {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .goal-metric-label {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .goal-metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .accordion {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        
+        .accordion-header {
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        .accordion-header:hover { background: #fafafa; }
+        .accordion-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .pillar-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .accordion-icon { font-size: 20px; transition: transform 0.3s; color: #999; }
+        .accordion.active .accordion-icon { transform: rotate(180deg); }
+        
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .accordion.active .accordion-content { max-height: 2000px; }
+        
+        .accordion-body { padding: 24px; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .tooltip {
+            display: inline-block;
+            margin-left: 6px;
+            color: #667eea;
+            cursor: help;
+            font-size: 14px;
+            position: relative;
+            font-weight: 600;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background: white;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        
+        .slider-container { margin-top: 8px; }
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e5e5;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; }
+        .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .checkbox-item label { margin: 0; cursor: pointer; font-weight: 400; font-size: 14px; }
+        
+        .alert-panel {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        .alert-panel.show { display: block; }
+        .alert-panel.critical { background: #f8d7da; border-color: #dc3545; }
+        
+        .alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .alert-icon { font-size: 24px; }
+        .alert-title { font-weight: 700; font-size: 16px; color: #1a1a1a; }
+        .alert-message { font-size: 14px; line-height: 1.6; color: #666; margin-bottom: 12px; }
+        .alert-suggestions {
+            background: rgba(255,255,255,0.6);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .alert-suggestions strong { color: #1a1a1a; display: block; margin-bottom: 6px; }
+        .alert-suggestions ul { margin: 8px 0; padding-left: 20px; }
+        .alert-suggestions li { margin-bottom: 4px; }
+        
+        .results-panel {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.15);
+            padding: 32px;
+            margin: 40px 0;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .results-header h2 { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+        .results-actions { display: flex; gap: 12px; }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        .btn-secondary { background: #f5f5f5; color: #333; }
+        .btn-secondary:hover { background: #e5e5e5; }
+        
+        .pricing-scenarios {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .scenario-card {
+            background: #fafafa;
+            padding: 16px;
+            border-radius: 8px;
+            border: 2px solid #e5e5e5;
+        }
+        .scenario-card.recommended {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%);
+        }
+        
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .scenario-name { font-weight: 600; color: #1a1a1a; font-size: 14px; }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-success { background: #10b981; color: white; }
+        .badge-warning { background: #f59e0b; color: white; }
+        .badge-info { background: #3b82f6; color: white; }
+        
+        .scenario-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 8px 0;
+        }
+        .scenario-details { font-size: 12px; color: #666; line-height: 1.4; }
+        
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .metric { text-align: center; }
+        .metric-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .metric-value { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+        
+        @media (max-width: 768px) {
+            .input-row { grid-template-columns: 1fr; }
+            .pricing-scenarios { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Calculateur Pricing Coach & Infopreneur</h1>
+            <p>Fixez un prix cohérent avec vos coûts, votre valeur et le marché</p>
+            
+            <div class="mode-switcher">
+                <button class="mode-btn active" onclick="setMode('pricing')">💰 Calculer mon prix</button>
+                <button class="mode-btn" onclick="setMode('goals')">🎯 Atteindre X€/mois</button>
+            </div>
+        </div>
+        
+        <!-- MODE PRICING -->
+        <div class="mode-panel active" id="modePricing">
+            <div class="intro-card">
+                <h2>🎯 Méthode en 3 piliers</h2>
+                <p>Déterminez un prix qui couvre vos coûts, reflète votre expertise et reste compétitif.</p>
+            </div>
+            
+            <!-- PILIER 1 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h3><span class="pillar-number">1</span> Coûts & Capacité</h3>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Charges fixes mensuelles (€)</label>
+                                <input type="number" id="fixedCosts" placeholder="1200" min="0" oninput="saveAndCalculate()">
+                            </div>
+                            <div class="input-group">
+                                <label>Salaire mensuel souhaité (€)</label>
+                                <input type="number" id="desiredSalary" placeholder="3000" min="0" oninput="saveAndCalculate()">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Semaines vendables / mois</label>
+                                <input type="number" id="weeksPerMonth" placeholder="4" min="1" value="4" oninput="saveAndCalculate()">
+                            </div>
+                            <div class="input-group">
+                                <label>Heures productives / semaine</label>
+                                <input type="number" id="hoursPerWeek" placeholder="20" min="1" value="20" oninput="saveAndCalculate()">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Taux de non-facturable (%)</label>
+                            <input type="number" id="nonBillable" placeholder="35" min="0" max="90" value="35" oninput="saveAndCalculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PILIER 2 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h3><span class="pillar-number">2</span> Valeur & Modèle d'offre</h3>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="input-group">
+                            <label>Type d'offre</label>
+                            <select id="offerType" onchange="saveAndCalculate()">
+                                <option value="coaching">Coaching 1:1</option>
+                                <option value="program">Programme en ligne</option>
+                                <option value="cohort">Cohort (groupe)</option>
+                                <option value="workshop">Atelier live</option>
+                            </select>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Durée accompagnement (semaines)</label>
+                                <input type="number" id="programDuration" placeholder="8" min="1" value="8" oninput="saveAndCalculate()">
+                            </div>
+                            <div class="input-group">
+                                <label>Heures totales livrées</label>
+                                <input type="number" id="totalHours" placeholder="12" min="1" value="12" oninput="saveAndCalculate()">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Amplification de valeur</label>
+                            <div class="slider-container">
+                                <input type="range" id="valueAmplification" min="0" max="100" value="50" oninput="updateSliderValue(this); saveAndCalculate()">
+                                <div class="slider-value"><span id="valueAmplificationValue">50</span> / 100</div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Bonus / Livrables inclus</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bonusTemplates" onchange="saveAndCalculate()">
+                                    <label for="bonusTemplates">Templates</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bonusCommunity" onchange="saveAndCalculate()">
+                                    <label for="bonusCommunity">Communauté</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bonusSupport" onchange="saveAndCalculate()">
+                                    <label for="bonusSupport">Support DM</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bonusReplays" onchange="saveAndCalculate()">
+                                    <label for="bonusReplays">Replays</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Coûts variables par client (€)</label>
+                            <input type="number" id="variableCosts" placeholder="50" min="0" value="0" oninput="saveAndCalculate()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PILIER 3 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h3><span class="pillar-number">3</span> Marché & Conversion</h3>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Benchmark prix min (€)</label>
+                                <input type="number" id="benchmarkMin" placeholder="500" min="0" oninput="saveAndCalculate()">
+                            </div>
+                            <div class="input-group">
+                                <label>Benchmark prix médian (€)</label>
+                                <input type="number" id="benchmarkMedian" placeholder="1200" min="0" oninput="saveAndCalculate()">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Benchmark prix max (€)</label>
+                            <input type="number" id="benchmarkMax" placeholder="2500" min="0" oninput="saveAndCalculate()">
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Audience actuelle (emails)</label>
+                                <input type="number" id="audienceSize" placeholder="500" min="0" value="0" oninput="saveAndCalculate()">
+                            </div>
+                            <div class="input-group">
+                                <label>Taux de conversion (%)</label>
+                                <input type="number" id="conversionRate" placeholder="2" min="0" max="100" value="2" oninput="saveAndCalculate()">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Slots max par cohorte/session</label>
+                                <input type="number" id="maxSlots" placeholder="10" min="1" value="10" oninput="saveAndCalculate()">
+                            </div>
+                            <div class="input-group">
+                                <label>Frais plateforme paiement (%)</label>
+                                <input type="number" id="paymentFees" placeholder="3" min="0" max="15" value="3" oninput="saveAndCalculate()">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Poids du marché dans le calcul</label>
+                            <div class="slider-container">
+                                <input type="range" id="marketWeight" min="0" max="100" value="30" oninput="updateSliderValue(this); saveAndCalculate()">
+                                <div class="slider-value"><span id="marketWeightValue">30</span>%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ALERT PANEL -->
+            <div class="alert-panel" id="alertPanel">
+                <div class="alert-header">
+                    <span class="alert-icon" id="alertIcon">⚠️</span>
+                    <span class="alert-title" id="alertTitle">Attention</span>
+                </div>
+                <div class="alert-message" id="alertMessage"></div>
+                <div class="alert-suggestions" id="alertSuggestions"></div>
+            </div>
+            
+            <!-- RESULTS PANEL -->
+            <div class="results-panel">
+                <div class="results-header">
+                    <h2>📊 Vos Prix Recommandés</h2>
+                    <div class="results-actions">
+                        <button class="btn btn-secondary" onclick="copyResults()">📋 Copier</button>
+                        <button class="btn btn-primary" onclick="window.print()">📄 PDF</button>
+                    </div>
+                </div>
+                <div class="pricing-scenarios">
+                    <div class="scenario-card">
+                        <div class="scenario-header">
+                            <span class="scenario-name">Essentiel</span>
+                            <span class="badge badge-info">Entrée</span>
+                        </div>
+                        <div class="scenario-price" id="priceEssential">-</div>
+                        <div class="scenario-details" id="detailsEssential">-</div>
+                    </div>
+                    <div class="scenario-card recommended">
+                        <div class="scenario-header">
+                            <span class="scenario-name">Standard</span>
+                            <span class="badge badge-success" id="badgeStandard">Recommandé</span>
+                        </div>
+                        <div class="scenario-price" id="priceStandard">-</div>
+                        <div class="scenario-details" id="detailsStandard">-</div>
+                    </div>
+                    <div class="scenario-card">
+                        <div class="scenario-header">
+                            <span class="scenario-name">VIP</span>
+                            <span class="badge badge-warning">Premium</span>
+                        </div>
+                        <div class="scenario-price" id="priceVIP">-</div>
+                        <div class="scenario-details" id="detailsVIP">-</div>
+                    </div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-label">Prix/Heure</div>
+                        <div class="metric-value" id="metricHourly">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Ventes possibles</div>
+                        <div class="metric-value" id="metricSales">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">CA Prévisionnel</div>
+                        <div class="metric-value" id="metricRevenue">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Marge nette</div>
+                        <div class="metric-value" id="metricMargin">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MODE GOALS -->
+        <div class="mode-panel" id="modeGoals">
+            <div class="intro-card">
+                <h2>🎯 Mode objectif inversé</h2>
+                <p>Entrez votre objectif de revenu mensuel et découvrez ce qu'il vous faut pour l'atteindre.</p>
+            </div>
+            
+            <div class="goal-input-card">
+                <div class="goal-input-group">
+                    <label>Objectif de revenu mensuel (€)</label>
+                    <input type="number" id="goalRevenue" class="goal-input-large" placeholder="5000" min="0">
+                </div>
+                
+                <div class="input-row" style="margin-bottom: 20px;">
+                    <div class="input-group">
+                        <label>Prix de votre offre (€)</label>
+                        <input type="number" id="goalPrice" placeholder="1500" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Heures par client</label>
+                        <input type="number" id="goalHoursPerClient" placeholder="10" min="1">
+                    </div>
+                </div>
+                
+                <button class="calculate-goal-btn" onclick="calculateGoals()">🚀 Calculer mes besoins</button>
+            </div>
+            
+            <div class="goal-results" id="goalResults">
+                <h3>📊 Pour atteindre <span id="goalTargetDisplay">0€</span>/mois :</h3>
+                
+                <div class="goal-metric">
+                    <span class="goal-metric-label">💰 Clients à vendre par mois</span>
+                    <span class="goal-metric-value" id="goalClientsNeeded">-</span>
+                </div>
+                
+                <div class="goal-metric">
+                    <span class="goal-metric-label">⏰ Heures productives nécessaires</span>
+                    <span class="goal-metric-value" id="goalHoursNeeded">-</span>
+                </div>
+                
+                <div class="goal-metric">
+                    <span class="goal-metric-label">📧 Taille liste email (conversion 2%)</span>
+                    <span class="goal-metric-value" id="goalAudienceNeeded">-</span>
+                </div>
+                
+                <div class="goal-metric">
+                    <span class="goal-metric-label">📈 Ou conversion nécessaire (avec audience actuelle)</span>
+                    <span class="goal-metric-value" id="goalConversionNeeded">-</span>
+                </div>
+                
+                <div class="goal-metric">
+                    <span class="goal-metric-label">💵 CA brut mensuel total</span>
+                    <span class="goal-metric-value" id="goalGrossRevenue">-</span>
+                </div>
+                
+                <div class="alert-panel show" style="margin-top: 20px; background: #e8f5e9; border-color: #4caf50;">
+                    <div class="alert-header">
+                        <span class="alert-icon">💡</span>
+                        <span class="alert-title">Stratégies pour atteindre cet objectif</span>
+                    </div>
+                    <div class="alert-suggestions" id="goalStrategies"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fmtEuro(num) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+        }
+        
+        function safeNum(value, defaultValue = 0) {
+            const num = parseFloat(value) || defaultValue;
+            return num < 0 ? 0 : num;
+        }
+        
+        function toggleAccordion(header) {
+            header.parentElement.classList.toggle('active');
+        }
+        
+        function updateSliderValue(slider) {
+            document.getElementById(slider.id + 'Value').textContent = slider.value;
+        }
+        
+        function setMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.mode-panel').forEach(panel => panel.classList.remove('active'));
+            
+            if (mode === 'pricing') {
+                document.querySelector('[onclick="setMode(\'pricing\')"]').classList.add('active');
+                document.getElementById('modePricing').classList.add('active');
+            } else {
+                document.querySelector('[onclick="setMode(\'goals\')"]').classList.add('active');
+                document.getElementById('modeGoals').classList.add('active');
+            }
+        }
+        
+        function calculateGoals() {
+            const goalRevenue = safeNum(document.getElementById('goalRevenue').value);
+            const goalPrice = safeNum(document.getElementById('goalPrice').value);
+            const goalHoursPerClient = safeNum(document.getElementById('goalHoursPerClient').value, 10);
+            const currentAudience = safeNum(document.getElementById('audienceSize')?.value, 0);
+            
+            if (goalRevenue === 0 || goalPrice === 0) {
+                alert('Veuillez remplir l\'objectif de revenu et le prix de votre offre');
+                return;
+            }
+            
+            // Calculs
+            const clientsNeeded = Math.ceil(goalRevenue / goalPrice);
+            const hoursNeeded = clientsNeeded * goalHoursPerClient;
+            const audienceNeeded = Math.ceil(clientsNeeded / 0.02); // 2% conversion
+            const conversionNeeded = currentAudience > 0 ? ((clientsNeeded / currentAudience) * 100).toFixed(1) : 0;
+            const grossRevenue = clientsNeeded * goalPrice;
+            
+            // Affichage
+            document.getElementById('goalTargetDisplay').textContent = fmtEuro(goalRevenue);
+            document.getElementById('goalClientsNeeded').textContent = clientsNeeded + ' clients';
+            document.getElementById('goalHoursNeeded').textContent = hoursNeeded + 'h/mois';
+            document.getElementById('goalAudienceNeeded').textContent = audienceNeeded + ' contacts';
+            document.getElementById('goalConversionNeeded').textContent = conversionNeeded + '%';
+            document.getElementById('goalGrossRevenue').textContent = fmtEuro(grossRevenue);
+            
+            // Stratégies
+            let strategies = '<strong>3 stratégies concrètes :</strong><ul>';
+            
+            if (hoursNeeded > 80) {
+                strategies += '<li><strong>Automatiser</strong> : ' + hoursNeeded + 'h/mois est trop. Passez sur un modèle groupe (cohort) ou asynchrone (programme enregistré).</li>';
+            } else {
+                strategies += '<li><strong>Capacité OK</strong> : ' + hoursNeeded + 'h/mois est gérable avec une bonne organisation.</li>';
+            }
+            
+            if (audienceNeeded > 1000) {
+                strategies += '<li><strong>Acquisition</strong> : Vous avez besoin de ' + audienceNeeded + ' contacts. Lancez un lead magnet + pubs Meta (100-200€/mois).</li>';
+            } else {
+                strategies += '<li><strong>Liste accessible</strong> : ' + audienceNeeded + ' contacts est atteignable en 3-6 mois avec du contenu organique.</li>';
+            }
+            
+            if (clientsNeeded > 10) {
+                strategies += '<li><strong>Pricing</strong> : ' + clientsNeeded + ' clients/mois est beaucoup. Envisagez de monter votre prix à ' + fmtEuro(goalRevenue / 8) + ' pour 8 clients seulement.</li>';
+            } else {
+                strategies += '<li><strong>Objectif réaliste</strong> : ' + clientsNeeded + ' clients/mois est un objectif atteignable avec une bonne stratégie de conversion.</li>';
+            }
+            
+            strategies += '</ul>';
+            document.getElementById('goalStrategies').innerHTML = strategies;
+            document.getElementById('goalResults').classList.add('show');
+            
+            // Scroll
+            document.getElementById('goalResults').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function checkCoherence(data) {
+            const {
+                fixedCosts, desiredSalary, weeksPerMonth, hoursPerWeek, nonBillable,
+                totalHours, benchmarkMedian, audienceSize, conversionRate, maxSlots
+            } = data;
+            
+            const alertPanel = document.getElementById('alertPanel');
+            const alertIcon = document.getElementById('alertIcon');
+            const alertTitle = document.getElementById('alertTitle');
+            const alertMessage = document.getElementById('alertMessage');
+            const alertSuggestions = document.getElementById('alertSuggestions');
+            
+            const productiveHoursPerMonth = weeksPerMonth * hoursPerWeek * (1 - nonBillable / 100);
+            const hourlyRate = productiveHoursPerMonth > 0 ? (fixedCosts + desiredSalary) / productiveHoursPerMonth : 0;
+            const minProjectPrice = hourlyRate * totalHours;
+            const potentialLeads = audienceSize * (conversionRate / 100);
+            const monthlyRevenue = benchmarkMedian * Math.min(potentialLeads, maxSlots);
+            
+            let hasAlert = false;
+            let isCritical = false;
+            let message = '';
+            let suggestions = '';
+            
+            if (hourlyRate > 200) {
+                hasAlert = true;
+                isCritical = true;
+                alertIcon.textContent = '🚨';
+                alertTitle.textContent = 'Objectif salaire incohérent';
+                message = `Votre configuration génère un taux horaire de <strong>${Math.round(hourlyRate)}€/h</strong>, ce qui est irréaliste pour la plupart des coachs/infopreneurs.<br><br>
+                Avec ${Math.round(productiveHoursPerMonth)}h productives/mois et un objectif de ${fmtEuro(fixedCosts + desiredSalary)}, vous devez facturer énormément.`;
+                
+                const realisticSalary = Math.round(productiveHoursPerMonth * 100);
+                suggestions = `<strong>💡 Solutions :</strong><ul>
+                    <li>Baisser votre salaire souhaité à <strong>${fmtEuro(realisticSalary)}</strong> (pour 100€/h)</li>
+                    <li>Augmenter vos heures productives à <strong>20h/semaine minimum</strong></li>
+                    <li>Réduire votre taux de non-facturable à <strong>25-30%</strong></li>
+                </ul>`;
+            }
+            else if (audienceSize > 0 && monthlyRevenue < (fixedCosts + desiredSalary)) {
+                hasAlert = true;
+                isCritical = true;
+                alertIcon.textContent = '📉';
+                alertTitle.textContent = 'Revenus mensuels insuffisants';
+                message = `Avec ${audienceSize} contacts et ${conversionRate}% de conversion, vous générez environ <strong>${fmtEuro(monthlyRevenue)}/mois</strong>.<br><br>
+                C'est insuffisant pour couvrir vos charges (${fmtEuro(fixedCosts)}) et votre salaire (${fmtEuro(desiredSalary)}).`;
+                
+                const neededAudience = Math.ceil((fixedCosts + desiredSalary) / (benchmarkMedian * (conversionRate / 100)));
+                suggestions = `<strong>💡 Solutions :</strong><ul>
+                    <li>Augmenter votre liste à <strong>${neededAudience} contacts minimum</strong></li>
+                    <li>Monter votre prix à <strong>${fmtEuro(Math.ceil((fixedCosts + desiredSalary) / potentialLeads))}</strong></li>
+                    <li>Baisser vos objectifs financiers</li>
+                </ul>`;
+            }
+            else if (benchmarkMedian > 0 && benchmarkMedian < minProjectPrice * 0.5) {
+                hasAlert = true;
+                alertIcon.textContent = '⚠️';
+                alertTitle.textContent = 'Prix benchmark trop bas';
+                message = `Votre benchmark médian (${fmtEuro(benchmarkMedian)}) est bien inférieur à votre coût de revient (${fmtEuro(minProjectPrice)}).`;
+                suggestions = `<strong>💡 Solutions :</strong><ul>
+                    <li>Réduire drastiquement les heures livrées (max <strong>${Math.floor(benchmarkMedian / hourlyRate)}h</strong>)</li>
+                    <li>Passer sur un modèle <strong>scalable</strong> (programme enregistré)</li>
+                    <li>Monter vos benchmarks à <strong>${fmtEuro(Math.ceil(minProjectPrice * 1.2))}</strong> minimum</li>
+                </ul>`;
+            }
+            else if (productiveHoursPerMonth < 40) {
+                hasAlert = true;
+                alertIcon.textContent = '⏰';
+                alertTitle.textContent = 'Capacité de production faible';
+                message = `Vous n'avez que <strong>${Math.round(productiveHoursPerMonth)}h productives/mois</strong>. C'est très peu pour atteindre vos objectifs financiers.`;
+                suggestions = `<strong>💡 Solutions :</strong><ul>
+                    <li>Augmenter à <strong>15-20h productives/semaine</strong></li>
+                    <li>Réduire votre taux de non-facturable à <strong>30%</strong></li>
+                    <li>Passer sur des offres <strong>groupes ou asynchrones</strong></li>
+                </ul>`;
+            }
+            
+            if (hasAlert) {
+                alertPanel.classList.add('show');
+                if (isCritical) alertPanel.classList.add('critical');
+                else alertPanel.classList.remove('critical');
+                alertMessage.innerHTML = message;
+                alertSuggestions.innerHTML = suggestions;
+            } else {
+                alertPanel.classList.remove('show');
+            }
+        }
+        
+        function calculatePricing() {
+            const fixedCosts = safeNum(document.getElementById('fixedCosts').value);
+            const desiredSalary = safeNum(document.getElementById('desiredSalary').value);
+            const weeksPerMonth = safeNum(document.getElementById('weeksPerMonth').value, 4);
+            const hoursPerWeek = safeNum(document.getElementById('hoursPerWeek').value, 20);
+            const nonBillable = safeNum(document.getElementById('nonBillable').value, 35);
+            const offerType = document.getElementById('offerType').value;
+            const totalHours = safeNum(document.getElementById('totalHours').value, 12);
+            const valueAmplification = safeNum(document.getElementById('valueAmplification').value, 50);
+            const variableCosts = safeNum(document.getElementById('variableCosts').value);
+            const hasTemplates = document.getElementById('bonusTemplates').checked;
+            const hasCommunity = document.getElementById('bonusCommunity').checked;
+            const hasSupport = document.getElementById('bonusSupport').checked;
+            const hasReplays = document.getElementById('bonusReplays').checked;
+            const bonusCount = [hasTemplates, hasCommunity, hasSupport, hasReplays].filter(Boolean).length;
+            const benchmarkMin = safeNum(document.getElementById('benchmarkMin').value, 500);
+            const benchmarkMedian = safeNum(document.getElementById('benchmarkMedian').value, 1500);
+            const benchmarkMax = safeNum(document.getElementById('benchmarkMax').value, 5000);
+            const audienceSize = safeNum(document.getElementById('audienceSize').value);
+            const conversionRate = safeNum(document.getElementById('conversionRate').value, 2);
+            const maxSlots = safeNum(document.getElementById('maxSlots').value, 10);
+            const paymentFees = safeNum(document.getElementById('paymentFees').value, 3);
+            const marketWeight = safeNum(document.getElementById('marketWeight').value, 30) / 100;
+            
+            checkCoherence({ fixedCosts, desiredSalary, weeksPerMonth, hoursPerWeek, nonBillable, totalHours, benchmarkMedian, audienceSize, conversionRate, maxSlots });
+            
+            const productiveHoursPerMonth = weeksPerMonth * hoursPerWeek * (1 - nonBillable / 100);
+            const hourlyRateFloor = productiveHoursPerMonth > 0 ? (fixedCosts + desiredSalary) / productiveHoursPerMonth : 0;
+            const timeCost = hourlyRateFloor * totalHours;
+            const baseCost = timeCost + variableCosts;
+            
+            let qualityMultiplier = 1.10;
+            switch(offerType) {
+                case 'coaching': qualityMultiplier = 1.20; break;
+                case 'program': qualityMultiplier = 1.10; break;
+                case 'cohort': qualityMultiplier = 1.15; break;
+                case 'workshop': qualityMultiplier = 1.08; break;
+            }
+            
+            const valuePremium = 1.0 + (valueAmplification / 100) * 0.1;
+            const bonusPremium = 1.0 + (bonusCount * 0.01);
+            let valueBasedPrice = baseCost * qualityMultiplier * valuePremium * bonusPremium;
+            
+            let finalBasePrice = valueBasedPrice;
+            if (benchmarkMedian > 0 && marketWeight > 0) {
+                finalBasePrice = (valueBasedPrice * (1 - marketWeight)) + (benchmarkMedian * marketWeight);
+                if (finalBasePrice < benchmarkMin * 0.90) finalBasePrice = benchmarkMin * 0.95;
+                else if (finalBasePrice > benchmarkMax * 1.15) finalBasePrice = benchmarkMax * 1.10;
+            }
+            
+            const minViablePrice = baseCost * 1.10;
+            finalBasePrice = Math.max(finalBasePrice, minViablePrice);
+            
+            const priceEssential = Math.round(finalBasePrice * 0.80);
+            const priceStandard = Math.round(finalBasePrice);
+            const priceVIP = Math.round(finalBasePrice * 1.35);
+            
+            const potentialLeads = Math.round(audienceSize * (conversionRate / 100));
+            const possibleSales = audienceSize > 0 ? Math.min(potentialLeads, maxSlots) : maxSlots;
+            const revenueStandard = priceStandard * possibleSales;
+            const paymentFeesAmount = revenueStandard * (paymentFees / 100);
+            const totalVariableCosts = variableCosts * possibleSales;
+            const marginStandard = revenueStandard - totalVariableCosts - paymentFeesAmount;
+            const pricePerHour = totalHours > 0 ? Math.round(priceStandard / totalHours) : 0;
+            const marginRatio = revenueStandard > 0 ? ((marginStandard / revenueStandard) * 100).toFixed(0) : 0;
+            
+            document.getElementById('priceEssential').textContent = fmtEuro(priceEssential);
+            document.getElementById('priceStandard').textContent = fmtEuro(priceStandard);
+            document.getElementById('priceVIP').textContent = fmtEuro(priceVIP);
+            document.getElementById('detailsEssential').textContent = 'Version allégée';
+            document.getElementById('detailsStandard').textContent = bonusCount >= 2 ? bonusCount + ' bonus inclus' : 'Offre complète';
+            document.getElementById('detailsVIP').textContent = 'Tous bonus + 1h 1:1';
+            
+            const medianRatio = benchmarkMedian > 0 ? priceStandard / benchmarkMedian : 1;
+            if (medianRatio < 0.85) {
+                document.getElementById('badgeStandard').textContent = '💰 Accessible';
+                document.getElementById('badgeStandard').className = 'badge badge-info';
+            } else if (medianRatio > 1.2) {
+                document.getElementById('badgeStandard').textContent = '⭐ Haut de gamme';
+                document.getElementById('badgeStandard').className = 'badge badge-warning';
+            } else {
+                document.getElementById('badgeStandard').textContent = '✅ Recommandé';
+                document.getElementById('badgeStandard').className = 'badge badge-success';
+            }
+            
+            document.getElementById('metricHourly').textContent = fmtEuro(pricePerHour) + '/h';
+            document.getElementById('metricSales').textContent = possibleSales + ' client' + (possibleSales > 1 ? 's' : '');
+            document.getElementById('metricRevenue').textContent = fmtEuro(revenueStandard);
+            document.getElementById('metricMargin').textContent = fmtEuro(marginStandard) + ' (' + marginRatio + '%)';
+        }
+        
+        function saveAndCalculate() {
+            calculatePricing();
+        }
+        
+        function copyResults() {
+            const essential = document.getElementById('priceEssential').textContent;
+            const standard = document.getElementById('priceStandard').textContent;
+            const vip = document.getElementById('priceVIP').textContent;
+            const text = `PRIX RECOMMANDÉS\nEssentiel: ${essential}\nStandard: ${standard}\nVIP: ${vip}`;
+            navigator.clipboard.writeText(text).then(() => alert('✅ Copié!'));
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => calculatePricing(), 200);
+        });
+    </script>
+</body>
+</html>
